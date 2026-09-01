@@ -1,0 +1,123 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: users
+    // Document ID: {uid}
+    // Fields:
+    //   - name: string (required)
+    //   - email: string (required, format: email)
+    //   - role: string (required, enum: ['admin', 'manager', 'user'])
+    //   - department: string (optional)
+    //   - status: string (optional, enum: ['online', 'offline', 'busy'])
+    //   - created_at: timestamp (optional)
+    //
+    // Collection: tasks
+    // Document ID: {taskId}
+    // Fields:
+    //   - title: string (required)
+    //   - description: string (optional)
+    //   - assigned_to: string (optional, uid)
+    //   - status: string (required, enum: ['pending', 'completed'])
+    //   - priority: string (required, enum: ['low', 'medium', 'high', 'critical'])
+    //   - department: string (optional)
+    //   - due_date: timestamp (optional)
+    //   - location: string (optional)
+    //   - image_url: string (optional)
+    //   - created_by: string (required, uid)
+    //   - created_at: timestamp (optional)
+    //   - completion_comment: string (optional)
+    //
+    // Collection: incidents
+    // Document ID: {incidentId}
+    // Fields:
+    //   - type: string (required)
+    //   - description: string (required)
+    //   - location: string (optional)
+    //   - reported_by: string (required, uid)
+    //   - severity: string (required, enum: ['low', 'medium', 'high', 'critical'])
+    //   - status: string (required, enum: ['open', 'resolved'])
+    //   - department: string (optional)
+    //   - image_url: string (optional)
+    //   - created_at: timestamp (optional)
+    //
+    // Collection: user_layouts
+    // Document ID: {uid}
+    // Fields:
+    //   - layouts: map (required)
+    //   - updated_at: timestamp (optional)
+    //
+    // [Other collections follow similar patterns]
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() &&
+        ((exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin') ||
+          (request.auth.token.email == "8847242@gmail.com" && request.auth.token.email_verified == true));
+    }
+
+    function isManager() {
+      return isAuthenticated() &&
+        ((exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'manager') || isAdmin());
+    }
+
+    function hasRequiredFields(fields) {
+      return request.resource.data.keys().hasAll(fields);
+    }
+
+    function hasOnlyAllowedFields(fields) {
+      return request.resource.data.keys().hasOnly(fields);
+    }
+
+    function isValidEmail(email) {
+      return email is string && email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
+    }
+
+    // ===============================================================
+    // Domain Validators
+    // ===============================================================
+    function isValidUser(data) {
+      return hasRequiredFields(['name', 'email', 'role']) &&
+             data.name is string && data.name.size() < 100 &&
+             isValidEmail(data.email) &&
+             data.role in ['admin', 'manager', 'user'];
+    }
+
+    function isValidTask(data) {
+      return hasRequiredFields(['title', 'status', 'priority', 'created_by']) &&
+             data.title is string && data.title.size() < 200 &&
+             data.status in ['pending', 'completed'] &&
+             data.priority in ['low', 'medium', 'high', 'critical'];
+    }
+
+    function isValidLayout(data) {
+      return hasRequiredFields(['layouts']) &&
+             data.layouts is map;
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    match /{document=**} {
+      allow read, write: if true;
+    }
+  }
+}

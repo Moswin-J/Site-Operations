@@ -1,0 +1,262 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "System user profile",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "description": "Full name" },
+        "email": { "type": "string", "format": "email", "description": "Email address" },
+        "role": { "type": "string", "enum": ["admin", "manager", "user"], "description": "User role" },
+        "department": { "type": "string", "description": "Assigned department" },
+        "status": { "type": "string", "enum": ["online", "offline", "busy"], "description": "Current status" },
+        "created_at": { "type": "string", "format": "date-time", "description": "Creation timestamp" }
+      },
+      "required": ["name", "email", "role"]
+    },
+    "Task": {
+      "title": "Task",
+      "description": "Operational task",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string", "description": "Task title" },
+        "description": { "type": "string", "description": "Detailed description" },
+        "assigned_to": { "type": "string", "description": "UID of assigned user" },
+        "status": { "type": "string", "enum": ["pending", "completed"], "description": "Current status" },
+        "priority": { "type": "string", "enum": ["low", "medium", "high", "critical"], "description": "Priority level" },
+        "department": { "type": "string", "description": "Related department" },
+        "due_date": { "type": "string", "format": "date", "description": "Due date" },
+        "location": { "type": "string", "description": "Physical location" },
+        "image_url": { "type": "string", "description": "URL to task image" },
+        "created_by": { "type": "string", "description": "UID of creator" },
+        "created_at": { "type": "string", "format": "date-time", "description": "Creation timestamp" },
+        "completion_comment": { "type": "string", "description": "Comment upon completion" }
+      },
+      "required": ["title", "status", "priority", "created_by"]
+    },
+    "Incident": {
+      "title": "Incident",
+      "description": "Reported incident",
+      "type": "object",
+      "properties": {
+        "type": { "type": "string", "description": "Incident type" },
+        "description": { "type": "string", "description": "Detailed description" },
+        "location": { "type": "string", "description": "Physical location" },
+        "reported_by": { "type": "string", "description": "UID of reporter" },
+        "severity": { "type": "string", "enum": ["low", "medium", "high", "critical"], "description": "Severity level" },
+        "status": { "type": "string", "enum": ["open", "resolved"], "description": "Current status" },
+        "department": { "type": "string", "description": "Related department" },
+        "image_url": { "type": "string", "description": "URL to incident image" },
+        "created_at": { "type": "string", "format": "date-time", "description": "Creation timestamp" }
+      },
+      "required": ["type", "description", "reported_by", "severity", "status"]
+    },
+    "Setting": {
+      "title": "Setting",
+      "description": "System configuration setting",
+      "type": "object",
+      "properties": {
+        "key": { "type": "string", "description": "Setting key" },
+        "value": { "type": "string", "description": "Setting value" },
+        "category": { "type": "string", "description": "Setting category" },
+        "updated_at": { "type": "string", "format": "date-time", "description": "Last update timestamp" }
+      },
+      "required": ["key", "value", "category"]
+    },
+    "AuditLog": {
+      "title": "AuditLog",
+      "description": "System audit log entry",
+      "type": "object",
+      "properties": {
+        "user_id": { "type": "string", "description": "UID of user who performed action" },
+        "action": { "type": "string", "description": "Action performed" },
+        "details": { "type": "string", "description": "Detailed description of action" },
+        "created_at": { "type": "string", "format": "date-time", "description": "Log timestamp" }
+      },
+      "required": ["user_id", "action", "created_at"]
+    },
+    "EmergencyProtocol": {
+      "title": "EmergencyProtocol",
+      "description": "Emergency response protocol",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "description": "Protocol name" },
+        "type": { "type": "string", "enum": ["fire", "medical", "security", "weather"], "description": "Protocol type" },
+        "description": { "type": "string", "description": "Detailed description" },
+        "steps": { "type": "array", "items": { "type": "string" }, "description": "Checklist steps" },
+        "priority": { "type": "string", "enum": ["critical"], "description": "Priority level" }
+      },
+      "required": ["name", "type", "steps"]
+    },
+    "ActiveEmergency": {
+      "title": "ActiveEmergency",
+      "description": "Currently active emergency",
+      "type": "object",
+      "properties": {
+        "protocol_id": { "type": "string", "description": "ID of the protocol" },
+        "activated_by": { "type": "string", "description": "UID of user who activated" },
+        "status": { "type": "string", "enum": ["active", "resolved"], "description": "Current status" },
+        "created_at": { "type": "string", "format": "date-time", "description": "Activation timestamp" },
+        "resolved_at": { "type": "string", "format": "date-time", "description": "Resolution timestamp" }
+      },
+      "required": ["protocol_id", "activated_by", "status", "created_at"]
+    },
+    "Shift": {
+      "title": "Shift",
+      "description": "Staff shift assignment",
+      "type": "object",
+      "properties": {
+        "user_id": { "type": "string", "description": "UID of assigned user" },
+        "start_time": { "type": "string", "format": "date-time", "description": "Shift start" },
+        "end_time": { "type": "string", "format": "date-time", "description": "Shift end" },
+        "role": { "type": "string", "description": "Role for this shift" },
+        "location": { "type": "string", "description": "Location for this shift" },
+        "notes": { "type": "string", "description": "Shift notes" },
+        "status": { "type": "string", "enum": ["scheduled", "ongoing", "completed", "cancelled"], "description": "Current status" },
+        "created_at": { "type": "string", "format": "date-time", "description": "Creation timestamp" }
+      },
+      "required": ["user_id", "start_time", "end_time", "status"]
+    },
+    "ShiftSwap": {
+      "title": "ShiftSwap",
+      "description": "Swap or coverage request details on scheduled shifts",
+      "type": "object",
+      "properties": {
+        "requester_id": { "type": "string", "description": "UID of the requester" },
+        "requester_name": { "type": "string", "description": "Name of the requester" },
+        "requester_shift_id": { "type": "string", "description": "UID of original shift" },
+        "colleague_id": { "type": "string", "description": "UID of target colleague" },
+        "colleague_name": { "type": "string", "description": "Name of target colleague" },
+        "colleague_shift_id": { "type": "string", "description": "UID of colleague's swap shift or null" },
+        "status": { "type": "string", "enum": ["pending_colleague", "pending_manager", "approved", "rejected", "cancelled"], "description": "Request state" },
+        "notes": { "type": "string", "description": "Reasons or handover note" },
+        "created_at": { "type": "string", "format": "date-time", "description": "Request timestamp" }
+      },
+      "required": ["requester_id", "requester_name", "requester_shift_id", "colleague_id", "colleague_name", "status"]
+    },
+    "VisitorStats": {
+      "title": "VisitorStats",
+      "description": "Daily visitor statistics",
+      "type": "object",
+      "properties": {
+        "date": { "type": "string", "format": "date", "description": "Date of stats" },
+        "count": { "type": "integer", "description": "Visitor count" },
+        "capacity": { "type": "integer", "description": "Max capacity" }
+      },
+      "required": ["date", "count", "capacity"]
+    },
+    "ClockLog": {
+      "title": "ClockLog",
+      "description": "Staff clock in/out session transaction details with gps location",
+      "type": "object",
+      "properties": {
+        "user_id": { "type": "string", "description": "UID of the staff member" },
+        "user_name": { "type": "string", "description": "Name of the staff member" },
+        "type": { "type": "string", "enum": ["clock_in", "clock_out"], "description": "Type of clock action" },
+        "timestamp": { "type": "string", "format": "date-time", "description": "Event timestamp" },
+        "latitude": { "type": "number", "description": "GPS Latitude tag" },
+        "longitude": { "type": "number", "description": "GPS Longitude tag" },
+        "accuracy": { "type": "number", "description": "GPS coordinates accuracy radius" },
+        "department": { "type": "string", "description": "Staff department" }
+      },
+      "required": ["user_id", "user_name", "type", "timestamp", "latitude", "longitude"]
+    },
+    "SiteStatus": {
+      "title": "SiteStatus",
+      "description": "Real-time site status indicator",
+      "type": "object",
+      "properties": {
+        "key": { "type": "string", "description": "Status key" },
+        "value": { "type": "string", "description": "Status value" },
+        "status_level": { "type": "string", "enum": ["normal", "warning", "critical"], "description": "Severity level" },
+        "updated_at": { "type": "string", "format": "date-time", "description": "Last update" }
+      },
+      "required": ["key", "value", "status_level"]
+    },
+    "RolePermission": {
+      "title": "RolePermission",
+      "description": "Permissions assigned to a user role",
+      "type": "object",
+      "properties": {
+        "role": { "type": "string", "enum": ["admin", "manager", "user"], "description": "User role" },
+        "permissions": { "type": "array", "items": { "type": "string" }, "description": "List of granted permissions" },
+        "updated_at": { "type": "string", "format": "date-time", "description": "Last update timestamp" }
+      },
+      "required": ["role", "permissions"]
+    },
+    "FootfallForecast": {
+      "title": "FootfallForecast",
+      "description": "Forecasted visitor numbers",
+      "type": "object",
+      "properties": {
+        "date": { "type": "string", "format": "date", "description": "Date of forecast" },
+        "forecasted_count": { "type": "integer", "description": "Forecasted visitor count" },
+        "updated_at": { "type": "string", "format": "date-time", "description": "Last update timestamp" }
+      },
+      "required": ["date", "forecasted_count"]
+    },
+    "GateLog": {
+      "title": "GateLog",
+      "description": "Individual entry/exit event",
+      "type": "object",
+      "properties": {
+        "type": { "type": "string", "enum": ["entry", "exit"], "description": "Type of event" },
+        "timestamp": { "type": "string", "format": "date-time", "description": "Event timestamp" },
+        "user_id": { "type": "string", "description": "UID of staff member" },
+        "user_name": { "type": "string", "description": "Name of staff member" }
+      },
+      "required": ["type", "timestamp"]
+    },
+    "UserLayout": {
+      "title": "UserLayout",
+      "description": "Customizable dashboard layout for a user",
+      "type": "object",
+      "properties": {
+        "layouts": { "type": "object", "description": "Map of page IDs to layout item arrays" },
+        "updated_at": { "type": "string", "format": "date-time", "description": "Last update timestamp" }
+      },
+      "required": ["layouts"]
+    },
+    "Permit": {
+      "title": "Permit",
+      "description": "Work, access, research, or operation permit details",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string", "description": "Permit designation/title" },
+        "type": { "type": "string", "enum": ["work", "research", "photography", "drone", "excavation", "other"], "description": "Type of permit" },
+        "applicant_name": { "type": "string", "description": "Full name of the applicant" },
+        "applicant_id": { "type": "string", "description": "UID of internal staff applicant" },
+        "description": { "type": "string", "description": "Description of activity or purpose" },
+        "start_time": { "type": "string", "format": "date-time", "description": "Permit validation start" },
+        "end_time": { "type": "string", "format": "date-time", "description": "Permit expiration timestamp" },
+        "status": { "type": "string", "enum": ["pending", "approved", "rejected", "expired"], "description": "Permit authorization state" },
+        "area": { "type": "string", "description": "Designated area / site location" },
+        "risk_level": { "type": "string", "enum": ["low", "medium", "high", "critical"], "description": "Risk profile rating" },
+        "approved_by": { "type": "string", "description": "Name or identifier of reviewer" },
+        "approval_notes": { "type": "string", "description": "Notes from the reviewer" },
+        "created_at": { "type": "string", "format": "date-time", "description": "Application date" }
+      },
+      "required": ["title", "type", "applicant_name", "status", "start_time", "end_time"]
+    }
+  },
+  "firestore": {
+    "users": { "schema": { "$ref": "#/entities/User" }, "description": "User profiles" },
+    "tasks": { "schema": { "$ref": "#/entities/Task" }, "description": "Operational tasks" },
+    "incidents": { "schema": { "$ref": "#/entities/Incident" }, "description": "Reported incidents" },
+    "settings": { "schema": { "$ref": "#/entities/Setting" }, "description": "System settings" },
+    "audit_logs": { "schema": { "$ref": "#/entities/AuditLog" }, "description": "System audit logs" },
+    "emergency_protocols": { "schema": { "$ref": "#/entities/EmergencyProtocol" }, "description": "Emergency response protocols" },
+    "active_emergencies": { "schema": { "$ref": "#/entities/ActiveEmergency" }, "description": "Active emergencies" },
+    "shifts": { "schema": { "$ref": "#/entities/Shift" }, "description": "Staff shifts" },
+    "shift_swaps": { "schema": { "$ref": "#/entities/ShiftSwap" }, "description": "Requests for shift swapping among team members" },
+    "visitor_stats": { "schema": { "$ref": "#/entities/VisitorStats" }, "description": "Daily visitor stats" },
+    "clock_logs": { "schema": { "$ref": "#/entities/ClockLog" }, "description": "Staff clock in/out session activity" },
+    "site_status": { "schema": { "$ref": "#/entities/SiteStatus" }, "description": "Real-time site status" },
+    "role_permissions": { "schema": { "$ref": "#/entities/RolePermission" }, "description": "Role-based access control mapping" },
+    "stats": { "schema": { "$ref": "#/entities/VisitorStats" }, "description": "Real-time visitor statistics" },
+    "footfall_forecasts": { "schema": { "$ref": "#/entities/FootfallForecast" }, "description": "Daily footfall forecasts" },
+    "gate_logs": { "schema": { "$ref": "#/entities/GateLog" }, "description": "Real-time entry/exit logs" },
+    "user_layouts": { "schema": { "$ref": "#/entities/UserLayout" }, "description": "User-specific layout configurations" },
+    "permits": { "schema": { "$ref": "#/entities/Permit" }, "description": "Work and operational permits" }
+  }
+}

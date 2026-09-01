@@ -1,0 +1,11 @@
+{
+  "name": "Site Operations",
+  "description": "Comprehensive daily operations management for heritage sites, featuring task tracking, incident reporting, operational permits, and real-time multi-user collaboration.",
+  "requestFramePermissions": [
+    "camera",
+    "geolocation"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
