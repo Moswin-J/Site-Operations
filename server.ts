@@ -1,14 +1,69 @@
+import dotenv from "dotenv";
 import express from "express";
+import type { Request, Response, NextFunction } from "express";
 import { createServer as createViteServer } from "vite";
 import path from "path";
 import { fileURLToPath } from "url";
+import crypto from "crypto";
 import { GoogleGenAI, Type } from "@google/genai";
 
+dotenv.config();
+dotenv.config({ path: ".env.local" });
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+function timingSafeEqual(a: string, b: string): boolean {
+  const bufA = Buffer.from(a);
+  const bufB = Buffer.from(b);
+  if (bufA.length !== bufB.length) return false;
+  return crypto.timingSafeEqual(bufA, bufB);
+}
+
+function parseBasicAuth(header: string | undefined): { user: string; pass: string } | null {
+  if (!header || !header.startsWith("Basic ")) return null;
+  const decoded = Buffer.from(header.slice(6), "base64").toString("utf8");
+  const colon = decoded.indexOf(":");
+  if (colon < 0) return null;
+  return { user: decoded.slice(0, colon), pass: decoded.slice(colon + 1) };
+}
+
+function noIndexHeaders(_req: Request, res: Response, next: NextFunction) {
+  res.setHeader("X-Robots-Tag", "noindex, nofollow, noarchive, nosnippet");
+  next();
+}
+
+function basicAuth(req: Request, res: Response, next: NextFunction) {
+  const expectedUser = process.env.BASIC_AUTH_USER;
+  const expectedPass = process.env.BASIC_AUTH_PASSWORD;
+
+  if (!expectedUser || !expectedPass) {
+    return next();
+  }
+
+  // Allow crawlers to read robots.txt and probes to hit health without credentials.
+  if (req.path === "/robots.txt" || req.path === "/api/health") {
+    return next();
+  }
+
+  const creds = parseBasicAuth(req.headers.authorization);
+  if (
+    creds &&
+    timingSafeEqual(creds.user, expectedUser) &&
+    timingSafeEqual(creds.pass, expectedPass)
+  ) {
+    return next();
+  }
+
+  res.setHeader("WWW-Authenticate", 'Basic realm="Site Operations"');
+  res.status(401).send("Authentication required");
+}
 
 async function startServer() {
   const app = express();
   const PORT = 3000;
+
+  app.use(noIndexHeaders);
+  app.use(basicAuth);
 
   // Serve JSON payloads parsed
   app.use(express.json());
@@ -145,7 +200,9 @@ Draft a smart, high-resolution Handover summary matching the schema.`;
   }
 
   app.listen(PORT, "0.0.0.0", () => {
+    const authOn = Boolean(process.env.BASIC_AUTH_USER && process.env.BASIC_AUTH_PASSWORD);
     console.log(`Server running on http://localhost:${PORT}`);
+    console.log(`Basic auth: ${authOn ? "enabled" : "disabled (set BASIC_AUTH_USER and BASIC_AUTH_PASSWORD)"}`);
   });
 }
 
